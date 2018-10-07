@@ -5,6 +5,7 @@ $wSource = get_post_meta( $post->ID, 'source', 1 );
 $wAuthor = get_post_meta( $post->ID, 'shared_by', 1 );
 $wLicense = get_post_meta( $post->ID, 'license', 1 );
 $wExtraNotes = get_post_meta( $post->ID, 'extra_notes', 1 );
+$wURL = get_post_meta( $post->ID, 'URL', 1 )
 ?>
 
 <div class="content thin">
@@ -70,9 +71,14 @@ $wExtraNotes = get_post_meta( $post->ID, 'extra_notes', 1 );
 															
 				</div> <!-- /post-header -->
 				    
+			    
 			    <div class="post-content">
 			    
-			    	<?php if ( $wAuthor == '')  : // empty meta data for auhor means post by email ?>
+			    	<p>
+			    	<?php if ( $wURL ) echo '<strong>URL Reviewed:</strong> ' . make_clickable( $wURL ) . '</br>';?>
+			    	</p>
+			    	
+			    	<?php if ( $wAuthor == '')  : // empty meta data for author means post by email ?>
 			    	
 			    	<?php
 			    	// strip the img tags out of content for stuff sent my email
@@ -109,11 +115,11 @@ $wExtraNotes = get_post_meta( $post->ID, 'extra_notes', 1 );
 			    		echo '<strong>Shared by:</strong> ' . $wAuthor . '<br />';
 			    		
 			    		
-			    		if ( ( trucollector_option('use_source') > 0 )  AND $wSource ) echo '<strong>Image Credit:</strong> ' .  make_links_clickable($wSource)  . '<br />';
+			    		if ( ( trucollector_option('use_source') > 0 )  AND $wSource ) echo '<strong>Featured Image Credit:</strong> ' .  make_links_clickable($wSource)  . '<br />';
 			    		
 			    		
 			    		if  ( trucollector_option('use_license') > 0 ) {
-			    			echo '<strong>Reuse License:</strong> ';
+			    			echo '<strong>Review Reuse License:</strong> ';
 			    			trucollector_the_license( $wLicense );
 			    			echo '<br />';
 			    			
@@ -129,12 +135,6 @@ $wExtraNotes = get_post_meta( $post->ID, 'extra_notes', 1 );
 			    	</p>
 			    	<?php endif;?>
 			    	
-			    	<form>
-			    	<label for="link">Link to image:</label>
-						<input type="text" class="form-control" id="link" value="<?php $iurl = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'full' ); echo $iurl[0];  ?>" onClick="this.select();" />
-			    	</form>					
-					
-			    
 			    </div> <!-- /post-content -->
 			    
 			    <div class="clear"></div>

@@ -27,7 +27,7 @@ $feedback_msg = trucollector_form_default_prompt() . ' Fields marked  <strong>*<
 
 // blank defaults
 
-$wTitle = $wText = $wSource = $wTags = $wNotes = '';
+$wTitle = $wURL = $wText = $wSource = $wTags = $wNotes = '';
 $wAuthor = 'Anonymous';
 				
 $wFeatureImageID = 0;
@@ -48,6 +48,7 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
  
  		// grab the variables from the form
  		$wTitle = 					sanitize_text_field( stripslashes( $_POST['wTitle'] ) );
+ 		$wURL = 					sanitize_text_field( stripslashes( $_POST['wURL'] ) );
  		$wAuthor = 					( isset ($_POST['wAuthor'] ) ) ? sanitize_text_field( stripslashes($_POST['wAuthor']) ) : 'Anonymous';		
  		$wTags = 					sanitize_text_field( $_POST['wTags'] );	
  		$wText = 					wp_kses_post( $_POST['wText'] );
@@ -63,19 +64,20 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
  		$errors = array();
  		
  		
- 		if ( $wFeatureImageID == 0) $errors[] = '<strong>Image File Missing</strong> - upload the image you wish to add to represent this item.';
- 		if ( $wTitle == '' ) $errors[] = '<strong>Title Missing</strong> - enter a descriptive title for this item.'; 
+ 		if ( $wFeatureImageID == 0) $errors[] = '<strong>Image File Missing</strong> - upload the image you wish to add to represent this review.';
+ 		if ( $wTitle == '' ) $errors[] = '<strong>Title Missing</strong> - enter a descriptive title for this review.'; 
+ 		if ( $wURL == '' ) $errors[] = '<strong>URL Missing</strong> - enter the URL of the thing you are reviewing.'; 
  		
- 		if (  trucollector_option('use_caption') == '2' AND $wText == '' ) $errors[] = '<strong>Description Missing</strong> - please enter a detailed description for this utem.';
+ 		if (  trucollector_option('use_caption') == '2' AND $wText == '' ) $errors[] = '<strong>Review Missing</strong> - please enter your review text.';
  
-  		if (  trucollector_option('use_source') == '2' AND $wSource == '' ) $errors[] = '<strong>Source Missing</strong> - please the name or organization to credit as the source of this image.';
+//  		if (  trucollector_option('use_source') == '2' AND $wSource == '' ) $errors[] = '<strong>Source Missing</strong> - please the name or organization to credit as the source of this image.';
   		
-  		if (  trucollector_option('use_license') == '2' AND $wLicense == '--' ) $errors[] = '<strong>License Not Selected</strong> - select an appropriate license for this item.'; 
+  		if (  trucollector_option('use_license') == '2' AND $wLicense == '--' ) $errors[] = '<strong>License Not Selected</strong> - select an appropriate license for your review.'; 
 		
  		 		
  		if ( count($errors) > 0 ) {
  			// form errors, build feedback string to display the errors
- 			$feedback_msg = 'Sorry, but there are a few errors in your submission. Please correct and try again. We really want to add your item. <ul>';
+ 			$feedback_msg = 'Sorry, but there are a few errors in your submission. Please correct and try again. We really want to add your review. <ul>';
  			
  			// Hah, each one is an oops, get it? 
  			foreach ($errors as $oops) {
@@ -99,6 +101,9 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
 
 			// insert as a new post
 			$post_id = wp_insert_post( $w_information );
+
+			// store the URL as post meta data
+			add_post_meta($post_id, 'URL', $wURL);
 			
 			// store the author as post meta data
 			add_post_meta($post_id, 'shared_by', $wAuthor);
@@ -142,14 +147,14 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
 				// who gets mail? They do.
 				$to_recipients = explode( "," ,  trucollector_option( 'notify' ) );
 		
-				$subject = 'New item submitted to ' . get_bloginfo();
+				$subject = 'New review submitted to ' . get_bloginfo();
 		
 				if ( trucollector_option('new_item_status') == 'publish' ) {
-					$message = 'An item <strong>"' . $wTitle . '"</strong> shared by <strong>' . $wAuthor . '</strong> has been published to ' . get_bloginfo() . '. You can <a href="'. site_url() . '/?p=' . $post_id  . '">see view it now</a>';
+					$message = 'A review <strong>"' . $wTitle . '"</strong> shared by <strong>' . $wAuthor . '</strong> has been published to ' . get_bloginfo() . '. You can <a href="'. site_url() . '/?p=' . $post_id  . '">see view it now</a>';
 				
 
 				} else {
-					$message = 'An item <strong>"' . $wTitle . '"</strong> shared by <strong>' . $wAuthor . '</strong> has been submitted to ' . get_bloginfo() . '. You can <a href="'. site_url() . '/?p=' . $post_id . 'preview=true' . '">preview it now</a>.<br /><br /> To  publish it, simply <a href="' . admin_url( 'edit.php?post_status=draft&post_type=post') . '">find it in the drafts</a> and change it\'s status from <strong>Draft</strong> to <strong>Publish</strong>';
+					$message = 'A review <strong>"' . $wTitle . '"</strong> shared by <strong>' . $wAuthor . '</strong> has been submitted to ' . get_bloginfo() . '. You can <a href="'. site_url() . '/?p=' . $post_id . 'preview=true' . '">preview it now</a>.<br /><br /> To  publish it, simply <a href="' . admin_url( 'edit.php?post_status=draft&post_type=post') . '">find it in the drafts</a> and change it\'s status from <strong>Draft</strong> to <strong>Publish</strong>';
 				}
 				
 				if ( $wNotes ) $message .= '<br /><br />There are some extra notes from the author:<blockquote>' . $wNotes . '</blockquote>';
@@ -222,15 +227,28 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
 		<form  id="collectorform" class="collectorform" method="post" action="" enctype="multipart/form-data">
 	
 	
-					<fieldset>
+				<fieldset>
+				    <legend>Your Review</legend> 
 					<label for="wTitle"><?php trucollector_form_item_title() ?> <strong>*</strong></label><br />
 					<p><?php trucollector_form_item_title_prompt() ?> </p>
 					<input type="text" name="wTitle" id="wTitle" class="required" value="<?php echo $wTitle; ?>" tabindex="1" />
+
+					<label for="wURL"><?php trucollector_form_item_URL() ?> <strong>*</strong></label><br />
+					<p><?php trucollector_form_item_URL_prompt() ?> </p>
+					<input type="text" name="wURL" id="wURL" class="required" value="<?php echo $wURL; ?>" tabindex="2" />
+					
+					<label for="wText"><?php trucollector_form_item_description() ?> <?php echo $required?> </label>
+					<p><?php trucollector_form_item_description_prompt()?> </p>
+					<?php
+					// set up for inserting the WP post editor
+					$settings = array( 'textarea_name' => 'wText', 'editor_height' => '300',  'tabindex'  => "3", 'media_buttons' => true);
+					wp_editor(  stripslashes( $wText ), 'wtext', $settings );
+					?>
+					</fieldset>					
 				</fieldset>	
-			
-				
 
 				<fieldset>
+				    <legend>Featured Image</legend>
 					<label for="headerImage"><?php trucollector_form_item_upload() ?> <strong>*</strong></label>
 					
 					<div class="uploader">
@@ -246,8 +264,6 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
 						
 						<?php endif?>
 						
-						
-						
 						<br />
 					
 						<input type="button" id="wFeatureImage_button"  class="btn btn-success btn-medium  upload_image_button" name="_wImage_button"  data-uploader_title="Add a New Image" data-uploader_button_text="Select Image" value="Select Image" tabindex="2" />
@@ -255,70 +271,28 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
 						</div>
 						
 						<p><?php trucollector_form_item_upload_prompt() ?><br clear="left"></p>
+ 
+      				<?php if (  trucollector_option('use_source') > '0'):	
+      					$required = (trucollector_option('use_source') == 2) ? '<strong>*</strong>' : '';
+      				?>
+    						<label for="wSource"><?php trucollector_form_item_image_source() ?> <?php echo $required?></label> 
+    						<p><?php trucollector_form_item_image_source_prompt() ?></p>
+    						<input type="text" name="wSource" id="wSource" class="required" value="<?php echo $wSource; ?>" tabindex="6" />
+    				
+    				<?php endif?>
 					
 				</fieldset>						
-
-
-
-
-				<fieldset>
-					<label for="wAuthor"><?php trucollector_form_item_author()?></label><br />
-					<p><?php trucollector_form_item_author_prompt()?></p>
-					<input type="text" name="wAuthor" id="wAuthor" class="required" value="<?php echo $wAuthor; ?>" tabindex="3" />
-				</fieldset>	
-  		
-  				
-  				<?php if (  trucollector_option('use_caption') > '0'):	
-  					$required = (trucollector_option('use_caption') == 2) ? '<strong>*</strong>' : '';
-  				?>
-  						
-					<fieldset>
-							<label for="wText"><?php trucollector_form_item_description() ?> <?php echo $required?> </label>
-							<p><?php trucollector_form_item_description_prompt()?> </p>
-							
-							<?php if (  trucollector_option('caption_field') == 's'):?>	
-							<textarea name="wText" id="wText" rows="4"  tabindex="4"><?php echo stripslashes( $wText );?></textarea><p style="font-size:0.8rem">To create hyperlinks use this shortcode<br /><code>[link url="http://www.themostamazingwebsiteontheinternet.com/" text="the coolest site on the internet"]</code><br />If you omit <code>text=</code> the URL will be the link text.</p>
-							
-							<?php else:?>
-							
-							<?php
-							// set up for inserting the WP post editor
-							$settings = array( 'textarea_name' => 'wText', 'editor_height' => '300',  'tabindex'  => "5", 'media_buttons' => false);
-
-							wp_editor(  stripslashes( $wText ), 'wtext', $settings );
-							
-							?>
-							
-							
-							<?php endif?>
-
-					</fieldset>	
-				
-				<?php endif?>			
-
-
-  				<?php if (  trucollector_option('use_source') > '0'):	
-  					$required = (trucollector_option('use_source') == 2) ? '<strong>*</strong>' : '';
-  				?>
-				
-					<fieldset>
-						<label for="wSource"><?php trucollector_form_item_image_source() ?> <?php echo $required?></label> 
-						<p><?php trucollector_form_item_image_source_prompt() ?></p>
-						<input type="text" name="wSource" id="wSource" class="required" value="<?php echo $wSource; ?>" tabindex="6" />
-				</fieldset>		
-				
-				<?php endif?>	
-				
+	
   				<?php if (  trucollector_option('use_license') > '0'):	
   					$required = (trucollector_option('use_license') == 2) ? '<strong>*</strong>' : '';
   				?>
-							
 				
 					<fieldset>
+					    <legend>Attribution / License</legend>
 						<label for="wLicense"><?php trucollector_form_item_license() ?> <?php echo $required?></label>
 						<p><?php trucollector_form_item_license_prompt() ?></p>
 						
-						<select name="wLicense" id="wLicense" tabindex="7" />
+						<select name="wLicense" id="wLicense" tabindex="4" />
 						<option value="--">Select a License</option>
 					
 						<?php
@@ -335,6 +309,7 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
 
 				
 				<fieldset>
+				    <legend>Get Organised</legend>
 					<label for="wCats"><?php trucollector_form_item_categories() ?></label>
 					<p><?php trucollector_form_item_categories_prompt() ?></p>
 					<?php 
@@ -350,26 +325,27 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
 					
 						$checked = ( in_array( $acat->term_id, $wCats) ) ? ' checked="checked"' : '';
 						
-						echo '<br /><input type="checkbox" name="wCats[]" tabindex="8" value="' . $acat->term_id . '"' . $checked . '> ' . $acat->name;
+						echo '<br /><input type="checkbox" name="wCats[]" tabindex="5" value="' . $acat->term_id . '"' . $checked . '> ' . $acat->name;
 					}
 					
 					?>
 					
-				</fieldset>
-
-				<fieldset>
 					<label for="wTags"><?php  trucollector_form_item_tags() ?></label>
 					<p><?php  trucollector_form_item_tags_prompt() ?></p>
+					<input type="text" name="wTags" id="wTags" value="<?php echo $wTags; ?>" tabindex="6"  />
 					
-					<input type="text" name="wTags" id="wTags" value="<?php echo $wTags; ?>" tabindex="9"  />
 				</fieldset>
 
-
 				<fieldset>
-						<label for="wNotes"><?php trucollector_form_item_editor_notes() ?></label>						
-						<p><?php trucollector_form_item_editor_notes_prompt() ?></p>
-						
-						<textarea name="wNotes" id="wNotes" rows="10"  tabindex="9"><?php echo stripslashes( $wNotes );?></textarea>
+				    <legend>Your Info</legend>
+					<label for="wAuthor"><?php trucollector_form_item_author()?></label><br />
+					<p><?php trucollector_form_item_author_prompt()?></p>
+					<input type="text" name="wAuthor" id="wAuthor" class="required" value="<?php echo $wAuthor; ?>" tabindex="7" />
+					
+					<label for="wNotes"><?php trucollector_form_item_editor_notes() ?></label>						
+					<p><?php trucollector_form_item_editor_notes_prompt() ?></p>
+					<textarea name="wNotes" id="wNotes" rows="10"  tabindex="8"><?php echo stripslashes( $wNotes );?></textarea>
+				
 				</fieldset>
 
 			
@@ -378,7 +354,7 @@ if ( isset( $_POST['trucollector_form_make_submitted'] ) && wp_verify_nonce( $_P
 				
 				<?php  wp_nonce_field( 'trucollector_form_make', 'trucollector_form_make_submitted' ); ?>
 
-				<input type="submit" value="Share This Item" id="makeit" name="makeit" tabindex="12">
+				<input type="submit" value="Share This Review" id="makeit" name="makeit" tabindex="9">
 				</fieldset>
 			
 						

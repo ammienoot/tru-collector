@@ -17,7 +17,7 @@ function trucollector_setup () {
   	// create the Collect form page if it does not exist
   	$page_data = array(
   		'post_title' 	=> 'Collect',
-  		'post_content'	=> 'Here is the place to add a new photo to this collection. If you are building this site, maybe edit this page to make it special.',
+  		'post_content'	=> 'Here is the place to add a new review to this collection. If you are building this site, maybe edit this page to make it special.',
   		'post_name'		=> 'collect',
   		'post_status'	=> 'publish',
   		'post_type'		=> 'page',
@@ -124,7 +124,7 @@ function trucollector_change_post_label() {
 // change the prompts and stuff for posts to be relevant to collectables
 function trucollector_change_post_object() {
 
-    $thing_name = 'Collectable';
+    $thing_name = 'Review';
 
     global $wp_post_types;
     $labels = &$wp_post_types['post']->labels;
@@ -149,18 +149,18 @@ function trucollector_change_post_object() {
 function trucollector_post_updated_messages ( $msg ) {
     $msg[ 'post' ] = array (
          0 => '', // Unused. Messages start at index 1.
-	 1 => "Collectable updated.",
+	 1 => "Review updated.",
 	 2 => 'Custom field updated.',  // Probably better do not touch
 	 3 => 'Custom field deleted.',  // Probably better do not touch
 
-	 4 => "Collectable updated.",
-	 5 => "Collectable restored to revision",
-	 6 => "Collectable published.",
+	 4 => "Review updated.",
+	 5 => "Review restored to revision",
+	 6 => "Review published.",
 
-	 7 => "Collectable saved.",
-	 8 => "Collectable submitted.",
-	 9 => "Collectable scheduled.",
-	10 => "Collectable draft updated.",
+	 7 => "Review saved.",
+	 8 => "Review submitted.",
+	 9 => "Review scheduled.",
+	10 => "Review draft updated.",
     );
     return $msg;
 }
@@ -341,7 +341,7 @@ function trucollector_options_to_admin() {
     $wp_admin_bar->add_menu( array(
         'parent' => '',
         'id' => 'trucollector-options',
-        'title' => __('TRU Collector Options'),
+        'title' => __('Review Collector Options'),
         'href' => admin_url( 'themes.php?page=trucollector-options')
     ) );
 }
@@ -466,7 +466,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 	$wp_customize->add_panel( 'customize_collector', array(
 		'priority'       => 500,
 		'theme_supports' => '',
-		'title'          => __( 'TRU Collector', 'fukasawa'),
+		'title'          => __( 'Review Collector', 'fukasawa'),
 		'description'    => __( 'Customizer Stuff', 'fukasawa'),
 	) );
 
@@ -501,7 +501,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 	
 	// setting for title label
 	$wp_customize->add_setting( 'item_title', array(
-		 'default'           => __( 'Title for this Item', 'fukasawa'),
+		 'default'           => __( 'Title for this Review', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -523,7 +523,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 	
 	// setting for title description
 	$wp_customize->add_setting( 'item_title_prompt', array(
-		 'default'           => __( 'Enter a descriptive title that works well as a headline when listed in this site.', 'fukasawa'),
+		 'default'           => __( 'Enter a descriptive review title that works well as a headline when listed in this site.', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -543,9 +543,53 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 	    )
 	);
 	
+	// setting for URL label
+	$wp_customize->add_setting( 'item_URL', array(
+		 'default'           => __( 'URL for this review', 'fukasawa'),
+		 'type' => 'theme_mod',
+		 'sanitize_callback' => 'sanitize_text'
+	) );
+	
+	// Control for URL label
+	$wp_customize->add_control( new WP_Customize_Control(
+	    $wp_customize,
+		'item_URL',
+		    array(
+		        'label'    => __( 'URL Label', 'fukasawa'),
+		        'priority' => 11,
+		        'description' => __( '' ),
+		        'section'  => 'collect_form',
+		        'settings' => 'item_URL',
+		        'type'     => 'text'
+		    )
+	    )
+	);
+	
+	// setting for URL description
+	$wp_customize->add_setting( 'item_URL_prompt', array(
+		 'default'           => __( 'Enter the URL of the thing you are reviewing.', 'fukasawa'),
+		 'type' => 'theme_mod',
+		 'sanitize_callback' => 'sanitize_text'
+	) );
+	
+	// Control for URL description
+	$wp_customize->add_control( new WP_Customize_Control(
+	    $wp_customize,
+		'item_URL_prompt',
+		    array(
+		        'label'    => __( 'URL Prompt', 'fukasawa'),
+		        'priority' => 12,
+		        'description' => __( '' ),
+		        'section'  => 'collect_form',
+		        'settings' => 'item_URL_prompt',
+		        'type'     => 'textarea'
+		    )
+	    )
+	);
+	
 	// setting for image upload label
 	$wp_customize->add_setting( 'item_upload', array(
-		 'default'           => __( 'Upload an Image for this Item', 'fukasawa'),
+		 'default'           => __( 'Upload an Image for this Review', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -587,19 +631,19 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 	    )
 	);
 
-	// setting for author  label
+	// setting for author label
 	$wp_customize->add_setting( 'item_author', array(
-		 'default'           => __( 'Who is Uploading the Item?', 'fukasawa'),
+		 'default'           => __( 'Who is Uploading the Review?', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
 	
-	// Control for author  label
+	// Control for author label
 	$wp_customize->add_control( new WP_Customize_Control(
 	    $wp_customize,
 		'item_author',
 		    array(
-		        'label'    => __( 'Credit Label', 'fukasawa'),
+		        'label'    => __( 'Author Label', 'fukasawa'),
 		        'priority' => 15,
 		        'description' => __( '' ),
 		        'section'  => 'collect_form',
@@ -611,7 +655,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 
 	// setting for author  label prompt
 	$wp_customize->add_setting( 'item_author_prompt', array(
-		 'default'           => __( 'Take credit for sharing this item by entering your name(s),  twitter handle(s), or remain "Anonymous".', 'fukasawa'),
+		 'default'           => __( 'Take credit for sharing this review by entering your name(s),  twitter handle(s), or remain "Anonymous".', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -621,7 +665,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 	    $wp_customize,
 		'item_author_prompt',
 		    array(
-		        'label'    => __( 'Image Upload Prompt', 'fukasawa'),
+		        'label'    => __( 'Author Prompt', 'fukasawa'),
 		        'priority' => 16,
 		        'description' => __( 'Directions for the author/uploader credit' ),
 		        'section'  => 'collect_form',
@@ -633,7 +677,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 
 	// setting for description  label
 	$wp_customize->add_setting( 'item_description', array(
-		 'default'           => __( 'Item Description', 'fukasawa'),
+		 'default'           => __( 'Your Review Text', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -643,7 +687,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 	    $wp_customize,
 		'item_description', 
 		    array(
-		        'label'    => __( 'Description Label', 'fukasawa'),
+		        'label'    => __( 'Review Text Label', 'fukasawa'),
 		        'priority' => 20,
 		        'description' => __( '' ),
 		        'section'  => 'collect_form',
@@ -655,7 +699,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 
 	// setting for description  label prompt
 	$wp_customize->add_setting( 'item_description_prompt', array(
-		 'default'           => __( 'Enter a descriptive caption to include with the item.', 'fukasawa'),
+		 'default'           => __( 'Use the editing area below the toolbar to write a description of the thing you are reviewing.  .', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -665,7 +709,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 	    $wp_customize,
 		'item_description_prompt',
 		    array(
-		        'label'    => __( 'Item Description Prompt', 'fukasawa'),
+		        'label'    => __( 'Review Text Prompt', 'fukasawa'),
 		        'priority' => 22,
 		        'description' => __( 'Directions for the description entry field' ),
 		        'section'  => 'collect_form',
@@ -699,7 +743,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 
 	// setting for image source  prompt
 	$wp_customize->add_setting( 'item_image_source_prompt', array(
-		 'default'           => __( 'Enter name of a person, web site, etc to give credit for the image submitted above.', 'fukasawa'),
+		 'default'           => __( 'Enter name of a person, web site, etc to give credit for the image submitted above. Include info about licensing too.', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -743,7 +787,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 
 	// setting for license  prompt
 	$wp_customize->add_setting( 'item_license_prompt', array(
-		 'default'           => __( 'Indicate a reuse license associated with the image. If this is your own image,  select a license to share it under.', 'fukasawa'),
+		 'default'           => __( 'Indicate a reuse license associated with the review. If this is your own review,  select a license to share it under.', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -753,7 +797,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 	    $wp_customize,
 		'item_license_prompt',
 		    array(
-		        'label'    => __( 'Image License Prompt', 'fukasawa'),
+		        'label'    => __( 'Review License Prompt', 'fukasawa'),
 		        'priority' => 28,
 		        'description' => __( 'Directions for the license selection' ),
 		        'section'  => 'collect_form',
@@ -787,7 +831,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 
 	// setting for categories  prompt
 	$wp_customize->add_setting( 'item_categories_prompt', array(
-		 'default'           => __( 'Check all categories that will help organize this item.', 'fukasawa'),
+		 'default'           => __( 'Check all categories that will help organize this review.', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -831,7 +875,7 @@ function trucollector_register_theme_customizer( $wp_customize ) {
 
 	// setting for tags  prompt
 	$wp_customize->add_setting( 'item_tags_prompt', array(
-		 'default'           => __( 'Add any descriptive tags for this item. Separate multiple ones with commas.', 'fukasawa'),
+		 'default'           => __( 'Add any descriptive tags for this review. Separate multiple ones with commas.', 'fukasawa'),
 		 'type' => 'theme_mod',
 		 'sanitize_callback' => 'sanitize_text'
 	) );
@@ -914,7 +958,7 @@ function trucollector_form_item_title() {
 	 if ( get_theme_mod( 'item_title') != "" ) {
 	 	echo get_theme_mod( 'item_title');
 	 }	else {
-	 	echo 'Title for this Item';
+	 	echo 'Title for this Review';
 	 }
 }
 
@@ -926,11 +970,27 @@ function trucollector_form_item_title_prompt() {
 	 }
 }
 
+function trucollector_form_item_URL() {
+	 if ( get_theme_mod( 'item_URL') != "" ) {
+	 	echo get_theme_mod( 'item_URL');
+	 }	else {
+	 	echo 'URL for this Review.';
+	 }
+}
+
+function trucollector_form_item_URL_prompt() {
+	 if ( get_theme_mod( 'item_URL_prompt') != "" ) {
+	 	echo get_theme_mod( 'item_URL_prompt');
+	 }	else {
+	 	echo 'Enter the URL of the thing you are reviewing.';
+	 }
+}
+
 function trucollector_form_item_upload() {
 	 if ( get_theme_mod( 'item_upload') != "" ) {
 	 	echo get_theme_mod( 'item_upload');
 	 }	else {
-	 	echo 'Upload an Image for this Item';
+	 	echo 'Upload a Featured Image for this Review';
 	 }
 }
 
@@ -946,7 +1006,7 @@ function trucollector_form_item_author() {
 	 if ( get_theme_mod( 'item_author') != "" ) {
 	 	echo get_theme_mod( 'item_author');
 	 }	else {
-	 	echo 'Who is Uploading the Item?';
+	 	echo 'Who is Uploading the Review?';
 	 }
 }
 
@@ -954,7 +1014,7 @@ function trucollector_form_item_author_prompt() {
 	 if ( get_theme_mod( 'item_author_prompt') != "" ) {
 	 	echo get_theme_mod( 'item_author_prompt');
 	 }	else {
-	 	echo 'Take credit for sharing this item by entering your name(s),  twitter handle(s), or remain "Anonymous".';
+	 	echo 'Take credit for sharing this review by entering your name(s),  twitter handle(s), or remain "Anonymous".';
 	 }
 }
 
@@ -962,7 +1022,7 @@ function trucollector_form_item_description() {
 	 if ( get_theme_mod( 'item_description') != "" ) {
 	 	echo get_theme_mod( 'item_description');
 	 }	else {
-	 	echo 'Description Label';
+	 	echo 'Your Review Text';
 	 }
 }
 
@@ -970,7 +1030,7 @@ function trucollector_form_item_description_prompt() {
 	 if ( get_theme_mod( 'item_description_prompt') != "" ) {
 	 	echo get_theme_mod( 'item_description_prompt');
 	 }	else {
-	 	echo 'Enter a descriptive caption to include with the item.';
+	 	echo 'Use the editing area below the toolbar to write a description of the thing you are reviewing.';
 	 }
 }
 
@@ -978,7 +1038,7 @@ function trucollector_form_item_image_source() {
 	 if ( get_theme_mod( 'item_image_source') != "" ) {
 	 	echo get_theme_mod( 'item_image_source');
 	 }	else {
-	 	echo 'Source of Image';
+	 	echo 'Source of Featured Image';
 	 }
 }
 
@@ -986,7 +1046,7 @@ function trucollector_form_item_image_source_prompt() {
 	 if ( get_theme_mod( 'item_image_source_prompt') != "" ) {
 	 	echo get_theme_mod( 'item_image_source_prompt');
 	 }	else {
-	 	echo 'Enter name of a person, web site, etc to give credit for the image submitted above.';
+	 	echo 'Enter name of a person, web site, etc to give credit for the image submitted above. Include info about licensing too.';
 	 }
 }
 
@@ -994,7 +1054,7 @@ function trucollector_form_item_license() {
 	 if ( get_theme_mod( 'item_license') != "" ) {
 	 	echo get_theme_mod( 'item_license');
 	 }	else {
-	 	echo 'Item License';
+	 	echo 'Review License';
 	 }
 }
 
@@ -1002,7 +1062,7 @@ function trucollector_form_item_license_prompt() {
 	 if ( get_theme_mod( 'item_license_prompt') != "" ) {
 	 	echo get_theme_mod( 'item_license_prompt');
 	 }	else {
-	 	echo 'Select the appropriate reuse license for this item.';
+	 	echo 'Select the appropriate reuse license for this review.';
 	 }
 }
 
@@ -1018,7 +1078,7 @@ function trucollector_form_item_categories_prompt() {
 	 if ( get_theme_mod( 'item_categories_prompt') != "" ) {
 	 	echo get_theme_mod( 'item_categories_prompt');
 	 }	else {
-	 	echo 'Check all categories that will help organize this item.';
+	 	echo 'Check all categories that will help organize this review.';
 	 }
 }
 
@@ -1034,7 +1094,7 @@ function trucollector_form_item_tags_prompt() {
 	 if ( get_theme_mod( 'item_tags_prompt') != "" ) {
 	 	echo get_theme_mod( 'item_tags_prompt');
 	 }	else {
-	 	echo 'Add any descriptive tags for this item. Separate multiple ones with commas.';
+	 	echo 'Add any descriptive tags for this review. Separate multiple ones with commas.';
 	 }
 }
 
